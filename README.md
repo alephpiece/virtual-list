@@ -60,6 +60,7 @@ import List from 'rc-virtual-list';
 | height     | List height                                             | number                                                                                                                                                                                | -       |
 | itemHeight | Item minimum height                                     | number                                                                                                                                                                                | -       |
 | itemKey    | Match key with item                                     | string                                                                                                                                                                                | -       |
+| overscan   | Overscan count                                          | number                                                                                                                                                                                | 1       |
 | styles     | style                                                   | { horizontalScrollBar?: React.CSSProperties; horizontalScrollBarThumb?: React.CSSProperties; verticalScrollBar?: React.CSSProperties; verticalScrollBarThumb?: React.CSSProperties; } | -       |
 
 `children` provides additional `props` argument to support IE 11 scroll shaking.
