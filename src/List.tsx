@@ -66,6 +66,13 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
    */
   scrollWidth?: number;
 
+  /**
+   * Number of items to render before/after the visible area.
+   * Use this to control how many items are rendered outside the visible area.
+   * @default 1
+   */
+  overscan?: number;
+
   styles?: {
     horizontalScrollBar?: React.CSSProperties;
     horizontalScrollBarThumb?: React.CSSProperties;
@@ -113,6 +120,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     extraRender,
     styles,
     showScrollBar = 'optional',
+    overscan = 1,
     ...restProps
   } = props;
 
@@ -258,16 +266,25 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       endIndex = mergedData.length - 1;
     }
 
-    // Give cache to improve scroll experience
-    endIndex = Math.min(endIndex + 1, mergedData.length - 1);
+    // Apply overscan: render extra items before and after the visible area
+    // This improves scrolling fluency by pre-rendering items that will soon come into view
+    const origStartIndex = startIndex; // Save the original startIndex for calculating the real offset
+    startIndex = Math.max(0, startIndex - overscan);
+    endIndex = Math.min(mergedData.length - 1, endIndex + overscan);
+
+    // Calculate offset: take overscan into account
+    // startOffset is the top position of the first item in the original visible area
+    // When overscan is applied, we need to add the height of the extra overscan items
+    const overscanOffset = (origStartIndex - startIndex) * itemHeight;
+    const adjustedStartOffset = startOffset - overscanOffset;
 
     return {
       scrollHeight: itemTop,
       start: startIndex,
       end: endIndex,
-      offset: startOffset,
+      offset: adjustedStartOffset,
     };
-  }, [inVirtual, useVirtual, offsetTop, mergedData, heightUpdatedMark, height]);
+  }, [inVirtual, useVirtual, offsetTop, mergedData, heightUpdatedMark, height, overscan]);
 
   rangeRef.current.start = start;
   rangeRef.current.end = end;
