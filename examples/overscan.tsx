@@ -116,6 +116,7 @@ const OverscanDemo: React.FC = () => {
         itemHeight={itemHeight}
         itemKey="id"
         overscan={overscan}
+        smoothScroll={true}
         onScroll={handleScroll}
         style={{ border: '1px solid #ccc', marginTop: 8 }}
       >

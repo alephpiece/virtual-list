@@ -3,6 +3,7 @@ import type { ResizeObserverProps } from 'rc-resize-observer';
 import ResizeObserver from 'rc-resize-observer';
 import { useEvent } from 'rc-util';
 import useLayoutEffect from 'rc-util/lib/hooks/useLayoutEffect';
+import raf from 'rc-util/lib/raf';
 import * as React from 'react';
 import { useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
@@ -73,6 +74,14 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
    */
   overscan?: number;
 
+  /**
+   * Enable smooth scrolling.
+   * When set to true, it will use default duration of 150ms.
+   * You can also specify custom duration by passing an object.
+   * @default false
+   */
+  smoothScroll?: boolean | { duration?: number };
+
   styles?: {
     horizontalScrollBar?: React.CSSProperties;
     horizontalScrollBarThumb?: React.CSSProperties;
@@ -121,6 +130,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     styles,
     showScrollBar = 'optional',
     overscan = 1,
+    smoothScroll = false,
     ...restProps
   } = props;
 
@@ -193,6 +203,17 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       return alignedTop;
     });
   }
+
+  // wheel smooth scroll animation ref
+  const wheelAnimationRef = useRef<number>();
+
+  // cancel wheel smooth scroll animation
+  const cancelWheelAnimation = () => {
+    if (wheelAnimationRef.current) {
+      raf.cancel(wheelAnimationRef.current);
+      wheelAnimationRef.current = undefined;
+    }
+  };
 
   // ================================ Legacy ================================
   // Put ref here since the range is generate by follow
@@ -432,11 +453,36 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
       triggerScroll();
     } else {
-      syncScrollTop((top) => {
-        const newTop = top + offsetXY;
+      if (!smoothScroll) {
+        syncScrollTop((top) => {
+          const newTop = top + offsetXY;
+          return newTop;
+        });
+      } else {
+        cancelWheelAnimation();
 
-        return newTop;
-      });
+        const currentTop = componentRef.current?.scrollTop || 0;
+        const startTime = Date.now();
+        const duration = typeof smoothScroll === 'object' ? smoothScroll.duration ?? 150 : 150;
+
+        const animateScroll = () => {
+          const now = Date.now();
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const easeProgress = 1 - Math.pow(1 - progress, 3);
+          const currentPos = currentTop + offsetXY * easeProgress;
+
+          syncScrollTop(currentPos);
+
+          if (progress < 1) {
+            wheelAnimationRef.current = raf(animateScroll);
+          } else {
+            wheelAnimationRef.current = undefined;
+          }
+        };
+
+        animateScroll();
+      }
     }
   });
 
@@ -532,6 +578,25 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     syncScrollTop,
     delayHideScrollBar,
   );
+
+  // Cancel wheel smooth scroll animation when user interaction
+  useLayoutEffect(() => {
+    const componentEle = componentRef.current;
+    if (componentEle && smoothScroll) {
+      const onInterrupt = () => cancelWheelAnimation();
+
+      componentEle.addEventListener('wheel', onInterrupt, { passive: true, capture: true });
+      componentEle.addEventListener('touchstart', onInterrupt, { passive: true });
+      componentEle.addEventListener('mousedown', onInterrupt, { passive: true });
+
+      return () => {
+        componentEle.removeEventListener('wheel', onInterrupt, { capture: true });
+        componentEle.removeEventListener('touchstart', onInterrupt);
+        componentEle.removeEventListener('mousedown', onInterrupt);
+      };
+    }
+    return undefined;
+  }, [smoothScroll]);
 
   React.useImperativeHandle(ref, () => ({
     nativeElement: containerRef.current,
