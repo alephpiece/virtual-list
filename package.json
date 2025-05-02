@@ -1,5 +1,5 @@
 {
-  "name": "rc-virtual-list",
+  "name": "@alephpiece/rc-virtual-list",
   "version": "3.18.5",
   "description": "React Virtual List Component",
   "engines": {
@@ -10,14 +10,14 @@
     "react-component",
     "virtual-list"
   ],
-  "homepage": "https://github.com/react-component/virtual-list",
+  "homepage": "https://github.com/alephpiece/virtual-list",
   "author": "smith3816@gmail.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/react-component/virtual-list.git"
+    "url": "https://github.com/alephpiece/virtual-list.git"
   },
   "bugs": {
-    "url": "https://github.com/react-component/virtual-list/issues"
+    "url": "https://github.com/alephpiece/virtual-list/issues"
   },
   "files": [
     "lib",

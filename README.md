@@ -6,10 +6,10 @@ React Virtual List Component which worked with animation.
 
 [npm-image]: http://img.shields.io/npm/v/rc-virtual-list.svg?style=flat-square
 [npm-url]: http://npmjs.org/package/rc-virtual-list
-[github-actions-image]: https://github.com/react-component/virtual-list/workflows/CI/badge.svg
-[github-actions-url]: https://github.com/react-component/virtual-list/actions
-[coveralls-image]: https://img.shields.io/codecov/c/github/react-component/virtual-list/master.svg?style=flat-square
-[coveralls-url]: https://codecov.io/gh/react-component/virtual-list
+[github-actions-image]: https://github.com/alephpiece/virtual-list/workflows/CI/badge.svg
+[github-actions-url]: https://github.com/alephpiece/virtual-list/actions
+[coveralls-image]: https://img.shields.io/codecov/c/github/alephpiece/virtual-list/master.svg?style=flat-square
+[coveralls-url]: https://codecov.io/gh/alephpiece/virtual-list
 [node-image]: https://img.shields.io/badge/node.js-%3E=_6.0-green.svg?style=flat-square
 [node-url]: http://nodejs.org/download/
 [download-image]: https://img.shields.io/npm/dm/rc-virtual-list.svg?style=flat-square
