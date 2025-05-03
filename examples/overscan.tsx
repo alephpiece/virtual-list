@@ -46,21 +46,11 @@ const OverscanDemo: React.FC = () => {
   const itemHeight = 50;
   const listRef = React.useRef<ListRef>(null);
 
-  // Scroll state
-  const [scrollTop, setScrollTop] = React.useState(0);
-
-  // Calculate visible area range
-  const visibleCount = Math.floor(containerHeight / itemHeight);
-  const startIndex = Math.floor(scrollTop / itemHeight);
-  const endIndex = Math.min(itemCount - 1, startIndex + visibleCount - 1);
+  // Current visible range
+  const [visibleRange, setVisibleRange] = React.useState<[number, number]>([0, 0]);
 
   // Generate data
   const data = React.useMemo(() => generateData(itemCount), [itemCount]);
-
-  // Handle scroll event
-  const handleScroll: React.UIEventHandler<HTMLElement> = (e) => {
-    setScrollTop(e.currentTarget.scrollTop);
-  };
 
   return (
     <div style={{ padding: 20 }}>
@@ -107,7 +97,7 @@ const OverscanDemo: React.FC = () => {
       {/* List status info */}
       <div style={{ marginBottom: 8 }}>
         <span>
-          Current visible area: #{startIndex} ~ #{endIndex}
+          Current visible area: #{visibleRange[0]} ~ #{visibleRange[1]}
         </span>
         <span style={{ marginLeft: 16 }}>Overscan: {overscan}</span>
       </div>
@@ -121,14 +111,24 @@ const OverscanDemo: React.FC = () => {
         itemKey="id"
         overscan={overscan}
         smoothScroll={true}
-        onScroll={handleScroll}
         style={{ border: '1px solid #ccc', marginTop: 8 }}
+        onVisibleChange={(visibleList) => {
+          if (visibleList.length > 0) {
+            setVisibleRange([visibleList[0].id, visibleList[visibleList.length - 1].id]);
+          } else {
+            setVisibleRange([0, 0]);
+          }
+        }}
       >
         {(item, index, props) => (
           <MyItem
             id={item.id}
             style={props.style}
-            status={index >= startIndex && index <= endIndex ? 'visible' : 'overscan'}
+            status={
+              item.id >= visibleRange[0] && item.id <= visibleRange[1]
+                ? 'visible'
+                : 'overscan'
+            }
           />
         )}
       </List>

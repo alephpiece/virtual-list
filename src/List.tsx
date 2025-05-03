@@ -228,6 +228,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     scrollHeight,
     start,
     end,
+    rawStart,
+    rawEnd,
     offset: fillerOffset,
   } = React.useMemo(() => {
     if (!useVirtual) {
@@ -289,7 +291,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
     // Apply overscan: render extra items before and after the visible area
     // This improves scrolling fluency by pre-rendering items that will soon come into view
-    const origStartIndex = startIndex; // Save the original startIndex for calculating the real offset
+    const origStartIndex = startIndex;
+    const origEndIndex = endIndex;
     startIndex = Math.max(0, startIndex - overscan);
     endIndex = Math.min(mergedData.length - 1, endIndex + overscan);
 
@@ -303,6 +306,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       scrollHeight: itemTop,
       start: startIndex,
       end: endIndex,
+      rawStart: origStartIndex,
+      rawEnd: origEndIndex,
       offset: adjustedStartOffset,
     };
   }, [inVirtual, useVirtual, offsetTop, mergedData, heightUpdatedMark, height, overscan]);
@@ -624,10 +629,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   /** We need told outside that some list not rendered */
   useLayoutEffect(() => {
     if (onVisibleChange) {
-      const trueStart = Math.max(0, start + overscan);
-      const trueEnd = Math.min(mergedData.length - 1, end - overscan);
-
-      const renderList = trueStart <= trueEnd ? mergedData.slice(trueStart, trueEnd + 1) : [];
+      const renderList = rawStart <= rawEnd ? mergedData.slice(rawStart, rawEnd + 1) : [];
       onVisibleChange(renderList, mergedData);
     }
   }, [start, end, mergedData, overscan]);
