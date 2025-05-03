@@ -39,9 +39,9 @@ const generateData = (count: number): Item[] => {
 const OverscanDemo: React.FC = () => {
   // Configurable parameters
   const [overscan, setOverscan] = React.useState(2); // Default overscan value is 2
-  const [itemCount, setItemCount] = React.useState(500); // Default item count
 
   // List configuration
+  const itemCount = 500;
   const containerHeight = 400;
   const itemHeight = 50;
   const listRef = React.useRef<ListRef>(null);
