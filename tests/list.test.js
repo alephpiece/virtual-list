@@ -94,7 +94,7 @@ describe('List.Basic', () => {
       expect(wrapper.find(Filler).props().height).toEqual(2000);
       expect(wrapper.find(Filler).props().offsetY + wrapper.find('li').length * 20).toEqual(2000);
 
-      expect(onVisibleChange.mock.calls[0][0]).toHaveLength(7);
+      expect(onVisibleChange.mock.calls[0][0]).toHaveLength(5);
       expect(onVisibleChange.mock.calls[0][1]).toHaveLength(100);
     });
   });

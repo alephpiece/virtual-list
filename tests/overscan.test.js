@@ -89,9 +89,9 @@ describe('List.Overscan', () => {
     // Visible range - the implementation considers more items as visible
     // due to overscan and extra motion item
     const visibleIds = onVisibleChange.mock.calls[0][0].map((item) => item.id);
-    expect(visibleIds.length).toBeGreaterThanOrEqual(5);
-    expect(visibleIds).toContain(0);
-    expect(visibleIds).toContain(4);
+    expect(visibleIds).toHaveLength(4);
+    expect(visibleIds).toContain(2);
+    expect(visibleIds).toContain(5);
     onVisibleChange.mockReset();
 
     // Scroll to middle

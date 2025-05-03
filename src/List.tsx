@@ -624,11 +624,13 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   /** We need told outside that some list not rendered */
   useLayoutEffect(() => {
     if (onVisibleChange) {
-      const renderList = mergedData.slice(start, end + 1);
+      const trueStart = Math.max(0, start + overscan);
+      const trueEnd = Math.min(mergedData.length - 1, end - overscan);
 
+      const renderList = trueStart <= trueEnd ? mergedData.slice(trueStart, trueEnd + 1) : [];
       onVisibleChange(renderList, mergedData);
     }
-  }, [start, end, mergedData]);
+  }, [start, end, mergedData, overscan]);
 
   // ================================ Extra =================================
   const getSize = useGetSize(mergedData, getKey, heights, itemHeight);
