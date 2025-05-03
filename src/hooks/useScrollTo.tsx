@@ -8,7 +8,7 @@ import { warning } from 'rc-util';
 
 const MAX_TIMES = 10;
 
-export type ScrollAlign = 'top' | 'bottom' | 'auto';
+export type ScrollAlign = 'top' | 'bottom' | 'center' | 'auto';
 
 export type ScrollPos = {
   left?: number;
@@ -111,6 +111,11 @@ export default function useScrollTo<T>(
           case 'bottom':
             targetTop = itemBottom - height + offset;
             break;
+          case 'center': {
+            const itemHeightValue = itemBottom - itemTop;
+            targetTop = itemTop - (height - itemHeightValue) / 2 - offset;
+            break;
+          }
 
           default: {
             const { scrollTop } = containerRef.current;

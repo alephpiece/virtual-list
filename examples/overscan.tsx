@@ -66,7 +66,11 @@ const OverscanDemo: React.FC = () => {
     <div style={{ padding: 20 }}>
       <h2>Overscan Example</h2>
       <p>
-        The <strong>overscan</strong> parameter controls how many extra items are rendered before and after the visible area in the virtual list. This helps improve scroll smoothness and prevents blank areas during fast scrolling. In this example, items with a <strong>white background</strong> are within the visible area, while items with a <strong>blue background</strong> are rendered due to overscan.
+        The <strong>overscan</strong> parameter controls how many extra items are rendered before
+        and after the visible area in the virtual list. This helps improve scroll smoothness and
+        prevents blank areas during fast scrolling. In this example, items with a{' '}
+        <strong>white background</strong> are within the visible area, while items with a{' '}
+        <strong>blue background</strong> are rendered due to overscan.
       </p>
 
       {/* Control panel */}
@@ -84,27 +88,27 @@ const OverscanDemo: React.FC = () => {
         </label>
 
         <button
-          onClick={() => listRef.current?.scrollTo({ index: 10, align: 'top' })}
+          onClick={() => listRef.current?.scrollTo({ index: 10, align: 'center' })}
           style={{ marginRight: 8 }}
         >
           Scroll to #10
         </button>
         <button
-          onClick={() => listRef.current?.scrollTo({ index: 50, align: 'top' })}
+          onClick={() => listRef.current?.scrollTo({ index: 50, align: 'center' })}
           style={{ marginRight: 8 }}
         >
           Scroll to #50
         </button>
-        <button
-          onClick={() => listRef.current?.scrollTo({ index: 200, align: 'top' })}
-        >
+        <button onClick={() => listRef.current?.scrollTo({ index: 200, align: 'center' })}>
           Scroll to #200
         </button>
       </div>
 
       {/* List status info */}
       <div style={{ marginBottom: 8 }}>
-        <span>Current visible area: #{startIndex} ~ #{endIndex}</span>
+        <span>
+          Current visible area: #{startIndex} ~ #{endIndex}
+        </span>
         <span style={{ marginLeft: 16 }}>Overscan: {overscan}</span>
       </div>
 
@@ -121,14 +125,10 @@ const OverscanDemo: React.FC = () => {
         style={{ border: '1px solid #ccc', marginTop: 8 }}
       >
         {(item, index, props) => (
-          <MyItem 
-            id={item.id} 
+          <MyItem
+            id={item.id}
             style={props.style}
-            status={
-              (index >= startIndex && index <= endIndex)
-                ? 'visible'
-                : 'overscan'
-            }
+            status={index >= startIndex && index <= endIndex ? 'visible' : 'overscan'}
           />
         )}
       </List>
@@ -136,11 +136,13 @@ const OverscanDemo: React.FC = () => {
       {/* Simple note */}
       <div style={{ marginTop: 16, fontSize: 14, color: '#666' }}>
         <p>
-          <strong>Note:</strong> Increasing the overscan value can make scrolling smoother, but will increase rendering overhead. In real applications, you should choose an appropriate overscan value based on your needs. Usually, 1-3 is enough.
+          <strong>Note:</strong> Increasing the overscan value can make scrolling smoother, but will
+          increase rendering overhead. In real applications, you should choose an appropriate
+          overscan value based on your needs. Usually, 1-3 is enough.
         </p>
       </div>
     </div>
   );
 };
 
-export default OverscanDemo; 
+export default OverscanDemo;

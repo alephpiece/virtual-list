@@ -182,6 +182,28 @@ describe('List.Scroll', () => {
 
       errSpy.mockRestore();
     });
+
+    it('center align should scroll item to center', () => {
+      const { scrollTo, container } = presetList();
+
+      scrollTo({ index: 50, align: 'center' });
+      // itemHeight = 20, height = 100, itemTop = 50*20 = 1000
+      // scrollTop = 1000 - (100 - 20)/2 = 960
+      expect(container.querySelector('ul').scrollTop).toEqual(960);
+    });
+
+    it('center align should not scroll out of top', () => {
+      const { scrollTo, container } = presetList();
+      scrollTo({ index: 0, align: 'center' });
+      expect(container.querySelector('ul').scrollTop).toEqual(0);
+    });
+
+    it('center align should not scroll out of bottom', () => {
+      const { scrollTo, container } = presetList();
+      scrollTo({ index: 99, align: 'center' });
+      // maxScrollTop = (100*20) - 100 = 1900
+      expect(container.querySelector('ul').scrollTop).toEqual(1900);
+    });
   });
 
   it('inject wheel', () => {
