@@ -76,11 +76,11 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
 
   /**
    * Enable smooth scrolling.
-   * When set to true, it will use default duration of 150ms.
-   * You can also specify custom duration by passing an object.
+   * You can also specify custom stepRatio by passing an object.
+   * - stepRatio: The ratio of the remaining distance to move per animation frame (0~1). Higher values mean faster but less smooth scrolling. Default is 0.33.
    * @default false
    */
-  smoothScroll?: boolean | { duration?: number };
+  smoothScroll?: boolean | { stepRatio?: number };
 
   styles?: {
     horizontalScrollBar?: React.CSSProperties;
@@ -206,14 +206,10 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   // wheel smooth scroll animation ref
   const wheelAnimationRef = useRef<number>();
-
-  // cancel wheel smooth scroll animation
-  const cancelWheelAnimation = () => {
-    if (wheelAnimationRef.current) {
-      raf.cancel(wheelAnimationRef.current);
-      wheelAnimationRef.current = undefined;
-    }
-  };
+  // target scroll top ref
+  const targetScrollTopRef = useRef<number>(0);
+  // animation state flag
+  const isAnimatingRef = useRef<boolean>(false);
 
   // ================================ Legacy ================================
   // Put ref here since the range is generate by follow
@@ -464,29 +460,42 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           return newTop;
         });
       } else {
-        cancelWheelAnimation();
-
         const currentTop = componentRef.current?.scrollTop || 0;
-        const startTime = Date.now();
-        const duration = typeof smoothScroll === 'object' ? smoothScroll.duration ?? 150 : 150;
 
-        const animateScroll = () => {
-          const now = Date.now();
-          const elapsed = now - startTime;
-          const progress = Math.min(elapsed / duration, 1);
-          const easeProgress = 1 - Math.pow(1 - progress, 3);
-          const currentPos = currentTop + offsetXY * easeProgress;
+        if (!isAnimatingRef.current) {
+          targetScrollTopRef.current = currentTop;
+        }
 
-          syncScrollTop(currentPos);
+        // Accumulate scroll offset to target position
+        targetScrollTopRef.current += offsetXY;
+        targetScrollTopRef.current = keepInRange(targetScrollTopRef.current);
 
-          if (progress < 1) {
-            wheelAnimationRef.current = raf(animateScroll);
-          } else {
-            wheelAnimationRef.current = undefined;
-          }
-        };
+        // If no animation is in progress, start a new animation
+        if (!isAnimatingRef.current) {
+          isAnimatingRef.current = true;
 
-        animateScroll();
+          const animateToTarget = () => {
+            // Get current position and calculate distance to target
+            const currentPos = componentRef.current?.scrollTop || 0;
+            const remainingDistance = targetScrollTopRef.current - currentPos;
+
+            // The ratio of the remaining distance to move per animation frame (0~1)
+            const stepRatio = (smoothScroll as any)?.stepRatio ?? 0.33;
+
+            // If the remaining distance is small enough (< 1px), finalize scroll position
+            if (Math.abs(remainingDistance) < 1) {
+              syncScrollTop(targetScrollTopRef.current);
+              wheelAnimationRef.current = undefined;
+              isAnimatingRef.current = false;
+              return;
+            }
+
+            syncScrollTop(currentPos + remainingDistance * stepRatio);
+            wheelAnimationRef.current = raf(animateToTarget);
+          };
+
+          animateToTarget();
+        }
       }
     }
   });
@@ -584,11 +593,16 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     delayHideScrollBar,
   );
 
-  // Cancel wheel smooth scroll animation when user interaction
   useLayoutEffect(() => {
     const componentEle = componentRef.current;
     if (componentEle && smoothScroll) {
-      const onInterrupt = () => cancelWheelAnimation();
+      // reset animation state when user interaction
+      const onInterrupt = () => {
+        if (isAnimatingRef.current) {
+          // update target position to current position
+          targetScrollTopRef.current = componentEle.scrollTop || 0;
+        }
+      };
 
       componentEle.addEventListener('wheel', onInterrupt, { passive: true, capture: true });
       componentEle.addEventListener('touchstart', onInterrupt, { passive: true });
