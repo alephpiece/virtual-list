@@ -75,7 +75,7 @@ export interface ListProps<T> extends Omit<React.HTMLAttributes<any>, 'children'
   overscan?: number;
 
   /**
-   * Enable smooth scrolling.
+   * Enable smooth virtual scrolling.
    * You can also specify custom stepRatio by passing an object.
    * - stepRatio: The ratio of the remaining distance to move per animation frame (0~1). Higher values mean faster but less smooth scrolling. Default is 0.33.
    * @default false

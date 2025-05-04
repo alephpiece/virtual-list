@@ -40,7 +40,8 @@ open http://localhost:8000/
 ## Usage
 
 ```js
-import List from 'rc-virtual-list';
+// import List from 'rc-virtual-list';
+import List from '@alephpiece/rc-virtual-list';
 
 <List data={[0, 1, 2]} height={200} itemHeight={30} itemKey="id">
   {index => <div>{index}</div>}
@@ -61,7 +62,7 @@ import List from 'rc-virtual-list';
 | itemHeight | Item minimum height                                     | number                                                                                                                                                                                | -       |
 | itemKey    | Match key with item                                     | string                                                                                                                                                                                | -       |
 | overscan   | Overscan count                                          | number                                                                                                                                                                                | 1       |
-| smoothScroll | Enable smooth virtual scrolling                       | boolean \| { stepRatio?: number }                                                                                                                                                      | false   |
+| smoothScroll | Enable smooth virtual scrolling                       | boolean \| { stepRatio?: number }                                                                                                                                                     | false   |
 | styles     | style                                                   | { horizontalScrollBar?: React.CSSProperties; horizontalScrollBarThumb?: React.CSSProperties; verticalScrollBar?: React.CSSProperties; verticalScrollBarThumb?: React.CSSProperties; } | -       |
 
 `children` provides additional `props` argument to support IE 11 scroll shaking.

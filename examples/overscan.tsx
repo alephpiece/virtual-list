@@ -1,6 +1,5 @@
 import * as React from 'react';
 import List, { type ListRef } from '../src/List';
-import './basic.less';
 
 interface Item {
   id: number;
@@ -36,7 +35,7 @@ const generateData = (count: number): Item[] => {
   return data;
 };
 
-const OverscanDemo: React.FC = () => {
+const Demo: React.FC = () => {
   // Configurable parameters
   const [overscan, setOverscan] = React.useState(2); // Default overscan value is 2
 
@@ -55,13 +54,6 @@ const OverscanDemo: React.FC = () => {
   return (
     <div style={{ padding: 20 }}>
       <h2>Overscan Example</h2>
-      <p>
-        The <strong>overscan</strong> parameter controls how many extra items are rendered before
-        and after the visible area in the virtual list. This helps improve scroll smoothness and
-        prevents blank areas during fast scrolling. In this example, items with a{' '}
-        <strong>white background</strong> are within the visible area, while items with a{' '}
-        <strong>blue background</strong> are rendered due to overscan.
-      </p>
 
       {/* Control panel */}
       <div style={{ marginBottom: 16 }}>
@@ -125,9 +117,7 @@ const OverscanDemo: React.FC = () => {
             id={item.id}
             style={props.style}
             status={
-              item.id >= visibleRange[0] && item.id <= visibleRange[1]
-                ? 'visible'
-                : 'overscan'
+              item.id >= visibleRange[0] && item.id <= visibleRange[1] ? 'visible' : 'overscan'
             }
           />
         )}
@@ -145,4 +135,4 @@ const OverscanDemo: React.FC = () => {
   );
 };
 
-export default OverscanDemo;
+export default Demo;
