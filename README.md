@@ -17,7 +17,7 @@ React Virtual List Component which worked with animation.
 
 ## Online Preview
 
-https://virtual-list-react-component.vercel.app/
+https://rc-virtual-list.vercel.app/
 
 ## Development
 
