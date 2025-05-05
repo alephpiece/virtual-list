@@ -170,6 +170,13 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const fillerInnerRef = useRef<HTMLDivElement>();
   const containerRef = useRef<HTMLDivElement>();
 
+  // wheel smooth scroll animation ref
+  const wheelAnimationRef = useRef<number>();
+  // target scroll top ref
+  const targetScrollTopRef = useRef<number>(0);
+  // animation state flag
+  const isAnimatingRef = useRef<boolean>(false);
+
   // =============================== Item Key ===============================
 
   const [offsetTop, setOffsetTop] = useState(0);
@@ -178,9 +185,29 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const onScrollbarStartMove = () => {
     setScrollMoving(true);
+    
+    // Cancel ongoing animation
+    if (wheelAnimationRef.current) {
+      raf.cancel(wheelAnimationRef.current);
+      wheelAnimationRef.current = undefined;
+    }
+    
+    // Sync target position to current scroll position
+    if (componentRef.current) {
+      targetScrollTopRef.current = componentRef.current.scrollTop || 0;
+    }
+    
+    // Reset animation state
+    isAnimatingRef.current = false;
   };
+  
   const onScrollbarStopMove = () => {
     setScrollMoving(false);
+    
+    // Sync target position to current scroll position
+    if (componentRef.current) {
+      targetScrollTopRef.current = componentRef.current.scrollTop || 0;
+    }
   };
 
   const sharedConfig: SharedConfig<T> = {
@@ -203,13 +230,6 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       return alignedTop;
     });
   }
-
-  // wheel smooth scroll animation ref
-  const wheelAnimationRef = useRef<number>();
-  // target scroll top ref
-  const targetScrollTopRef = useRef<number>(0);
-  // animation state flag
-  const isAnimatingRef = useRef<boolean>(false);
 
   // ================================ Legacy ================================
   // Put ref here since the range is generate by follow
@@ -418,6 +438,11 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       triggerScroll();
     } else {
       syncScrollTop(newOffset);
+      
+      // Sync target position to current scroll position during scrollbar dragging
+      if (smoothScroll && !horizontal) {
+        targetScrollTopRef.current = newOffset;
+      }
     }
   }
 
@@ -442,6 +467,29 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     return tmpOffsetLeft;
   };
 
+  // Add this effect after existing useLayoutEffect hooks
+  // Track scrollbar dragging state to enhance scroll behavior
+  useLayoutEffect(() => {
+    if (smoothScroll) {
+      // When scrollbar dragging state changes
+      if (scrollMoving) {
+        // Prevent any new wheel animations from starting during dragging
+        const prevWheelAnimation = wheelAnimationRef.current;
+        if (prevWheelAnimation) {
+          raf.cancel(prevWheelAnimation);
+          wheelAnimationRef.current = undefined;
+        }
+        isAnimatingRef.current = false;
+      } else {
+        // When scrollbar dragging ends, ensure target position is synced
+        if (componentRef.current) {
+          targetScrollTopRef.current = componentRef.current.scrollTop || 0;
+        }
+      }
+    }
+  }, [scrollMoving, smoothScroll]);
+
+  // Modify the onWheelDelta handler to respect scrollMoving state
   const onWheelDelta: Parameters<typeof useFrameWheel>[6] = useEvent((offsetXY, fromHorizontal) => {
     if (fromHorizontal) {
       flushSync(() => {
@@ -454,7 +502,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
       triggerScroll();
     } else {
-      if (!smoothScroll) {
+      // Skip smooth scrolling animation if scrollbar is being dragged
+      if (!smoothScroll || scrollMoving) {
         syncScrollTop((top) => {
           const newTop = top + offsetXY;
           return newTop;
@@ -598,7 +647,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     if (componentEle && smoothScroll) {
       // reset animation state when user interaction
       const onInterrupt = () => {
-        // update target position to current position
+        // Always update target position to current position regardless of animation state
         targetScrollTopRef.current = componentEle.scrollTop || 0;
       };
 
