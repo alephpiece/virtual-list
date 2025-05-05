@@ -598,10 +598,8 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     if (componentEle && smoothScroll) {
       // reset animation state when user interaction
       const onInterrupt = () => {
-        if (isAnimatingRef.current) {
-          // update target position to current position
-          targetScrollTopRef.current = componentEle.scrollTop || 0;
-        }
+        // update target position to current position
+        targetScrollTopRef.current = componentEle.scrollTop || 0;
       };
 
       componentEle.addEventListener('wheel', onInterrupt, { passive: true, capture: true });
