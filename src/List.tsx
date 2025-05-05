@@ -646,7 +646,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       const renderList = rawStart <= rawEnd ? mergedData.slice(rawStart, rawEnd + 1) : [];
       onVisibleChange(renderList, mergedData);
     }
-  }, [start, end, mergedData, overscan]);
+  }, [rawStart, rawEnd, mergedData, onVisibleChange]);
 
   // ================================ Extra =================================
   const getSize = useGetSize(mergedData, getKey, heights, itemHeight);
