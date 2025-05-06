@@ -177,12 +177,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const [scrollMoving, setScrollMoving] = useState(false);
 
   // Initialize smooth scroll hook instead of using multiple refs
-  const {
-    scrollToPosition,
-    handleWheelDelta,
-    stopAnimation,
-    isAnimating,
-  } = useSmoothScroll({
+  const { scrollToPosition, handleWheelDelta, stopAnimation } = useSmoothScroll({
     containerRef: componentRef,
     enabled: !!smoothScroll,
     stepRatio: (smoothScroll as any)?.stepRatio ?? 0.33,
@@ -194,19 +189,19 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const onScrollbarStartMove = () => {
     setScrollMoving(true);
-    
+
     // Stop any ongoing animation
     stopAnimation();
-    
+
     // Sync target position to current scroll position
     if (componentRef.current) {
       setOffsetTop(componentRef.current.scrollTop || 0);
     }
   };
-  
+
   const onScrollbarStopMove = () => {
     setScrollMoving(false);
-    
+
     // Sync position when scrollbar dragging ends
     if (componentRef.current) {
       setOffsetTop(componentRef.current.scrollTop || 0);
@@ -230,7 +225,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     const alignedTop = keepInRange(value);
 
     // Choose scrolling method based on mode and state
-    if (smoothScroll && !scrollMoving && !isAnimating()) {
+    if (smoothScroll && !scrollMoving) {
       // Use smooth scrolling
       scrollToPosition(alignedTop);
     } else {
@@ -238,9 +233,14 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       if (componentRef.current) {
         componentRef.current.scrollTop = alignedTop;
       }
-      setOffsetTop(alignedTop);
+
+      // Only update state directly when not using smooth scroll or when dragging scrollbar.
+      // When smooth scrolling, offsetTop is updated by useSmoothScroll's onScrollPositionChange callback.
+      if (!smoothScroll || scrollMoving) {
+        setOffsetTop(alignedTop);
+      }
     }
-    
+
     return alignedTop;
   }
 
@@ -457,7 +457,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
         componentRef.current.scrollTop = newOffset;
       }
       setOffsetTop(newOffset);
-      
+
       // Trigger scroll event
       triggerScroll();
     }
@@ -546,12 +546,12 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
           const currentScrollTop = componentRef.current.scrollTop;
           const newScrollTop = currentScrollTop + delta;
           componentRef.current.scrollTop = newScrollTop;
-          
+
           // Force immediate React state update for ScrollBar to reflect change
           flushSync(() => {
             setOffsetTop(newScrollTop);
           });
-          
+
           // Trigger scroll event
           triggerScroll();
           return true;
