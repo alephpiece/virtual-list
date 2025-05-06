@@ -15,7 +15,6 @@ const MyItem: React.FC<{
       alignItems: 'center',
       justifyContent: 'center',
       border: '1px solid #eee',
-      backgroundColor: '#fff',
     }}
   >
     {id}
@@ -39,7 +38,14 @@ const Demo: React.FC = () => {
   const itemHeight = 50;
   const listRef = React.useRef<ListRef>(null);
 
+  const [focusedId, setFocusedId] = React.useState(0);
+  const [isMouseHoverEnabled, setIsMouseHoverEnabled] = React.useState(true);
+
   const data = React.useMemo(() => generateData(itemCount), [itemCount]);
+
+  React.useEffect(() => {
+    listRef.current?.scrollTo({ index: focusedId, align: 'auto' });
+  }, [focusedId]);
 
   let smoothScroll: boolean | { stepRatio: number };
   if (mode === 'true') {
@@ -51,7 +57,21 @@ const Demo: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: 20 }}>
+    <div
+      style={{ padding: 20 }}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        e.preventDefault();
+        if (e.key === 'ArrowDown') {
+          setFocusedId((prev) => Math.min(prev + 1, data.length - 1));
+          setIsMouseHoverEnabled(false);
+        } else if (e.key === 'ArrowUp') {
+          setFocusedId((prev) => Math.max(prev - 1, 0));
+          setIsMouseHoverEnabled(false);
+        }
+      }}
+      onMouseMove={() => setIsMouseHoverEnabled(true)}
+    >
       <h2>Smooth Virtual Scroll</h2>
 
       <div style={{ marginBottom: 16 }}>
@@ -112,7 +132,16 @@ const Demo: React.FC = () => {
         smoothScroll={smoothScroll}
         style={{ border: '1px solid #ccc', marginTop: 8 }}
       >
-        {(item) => <MyItem id={item.id} />}
+        {(item) => (
+          <div
+            onMouseEnter={() => {
+              if (isMouseHoverEnabled) setFocusedId(item.id);
+            }}
+            style={{ backgroundColor: item.id === focusedId ? 'lightgray' : 'transparent' }}
+          >
+            <MyItem id={item.id} />
+          </div>
+        )}
       </List>
 
       <div style={{ marginTop: 16, fontSize: 14, color: '#666' }}>
