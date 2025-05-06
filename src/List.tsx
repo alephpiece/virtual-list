@@ -185,25 +185,25 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
 
   const onScrollbarStartMove = () => {
     setScrollMoving(true);
-    
+
     // Cancel ongoing animation
     if (wheelAnimationRef.current) {
       raf.cancel(wheelAnimationRef.current);
       wheelAnimationRef.current = undefined;
     }
-    
+
     // Sync target position to current scroll position
     if (componentRef.current) {
       targetScrollTopRef.current = componentRef.current.scrollTop || 0;
     }
-    
+
     // Reset animation state
     isAnimatingRef.current = false;
   };
-  
+
   const onScrollbarStopMove = () => {
     setScrollMoving(false);
-    
+
     // Sync target position to current scroll position
     if (componentRef.current) {
       targetScrollTopRef.current = componentRef.current.scrollTop || 0;
@@ -438,7 +438,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       triggerScroll();
     } else {
       syncScrollTop(newOffset);
-      
+
       // Sync target position to current scroll position during scrollbar dragging
       if (smoothScroll && !horizontal) {
         targetScrollTopRef.current = newOffset;
@@ -720,21 +720,17 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     sharedConfig,
   );
 
-  let componentStyle: React.CSSProperties = null;
-  if (height) {
-    componentStyle = { [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle };
+  let componentStyle: React.CSSProperties = height
+    ? { [fullHeight ? 'height' : 'maxHeight']: height, ...ScrollStyle }
+    : undefined;
 
-    if (useVirtual) {
-      componentStyle.overflowY = 'hidden';
-
-      if (scrollWidth) {
-        componentStyle.overflowX = 'hidden';
-      }
-
-      if (scrollMoving) {
-        componentStyle.pointerEvents = 'none';
-      }
-    }
+  if (useVirtual && componentStyle) {
+    componentStyle = {
+      ...componentStyle,
+      overflowY: 'hidden',
+      ...(scrollWidth ? { overflowX: 'hidden' } : {}),
+      ...(scrollMoving ? { pointerEvents: 'none' } : {}),
+    };
   }
 
   const containerProps: React.HTMLAttributes<HTMLDivElement> = {};
