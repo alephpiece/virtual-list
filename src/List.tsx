@@ -177,7 +177,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
   const [scrollMoving, setScrollMoving] = useState(false);
 
   // Initialize smooth scroll hook instead of using multiple refs
-  const { scrollToPosition, handleWheelDelta, stopAnimation } = useSmoothScroll({
+  const { scrollToPosition, handleWheelDelta, stopAnimation, isAnimating } = useSmoothScroll({
     containerRef: componentRef,
     enabled: !!smoothScroll,
     stepRatio: (smoothScroll as any)?.stepRatio ?? 0.33,
@@ -225,7 +225,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
     const alignedTop = keepInRange(value);
 
     // Choose scrolling method based on mode and state
-    if (smoothScroll && !scrollMoving) {
+    if (smoothScroll && !scrollMoving && !isAnimating()) {
       // Use smooth scrolling
       scrollToPosition(alignedTop);
     } else {
@@ -233,12 +233,7 @@ export function RawList<T>(props: ListProps<T>, ref: React.Ref<ListRef>) {
       if (componentRef.current) {
         componentRef.current.scrollTop = alignedTop;
       }
-
-      // Only update state directly when not using smooth scroll or when dragging scrollbar.
-      // When smooth scrolling, offsetTop is updated by useSmoothScroll's onScrollPositionChange callback.
-      if (!smoothScroll || scrollMoving) {
-        setOffsetTop(alignedTop);
-      }
+      setOffsetTop(alignedTop);
     }
 
     return alignedTop;
